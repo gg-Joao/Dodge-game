@@ -59,7 +59,7 @@ def menu():
         titulo = font.render("Desvie dos projéteis", True, BRANCO)
         TELA.blit(titulo, (LARGURA // 2 - titulo.get_width() // 2, 100))
 
-        # Centralização
+    
         botao_jogar = pygame.Rect(LARGURA // 2 - 100, 300, 200, 50)
     
         texto_jogar = font.render("Jogar", True, BRANCO)
@@ -159,7 +159,7 @@ def main():
             if math.dist((obs['x'], obs['y']), (jogador_x, jogador_y)) < JOGADOR_TAMANHO // 2 + TAMANHO_OBSTACULO // 2:
                 if tempo_jogo > recorde_tempo:
                     recorde_tempo = tempo_jogo
-                if tela_morte(tempo_jogo):  # jogar de novo
+                if tela_morte(tempo_jogo):  
                     main()
                 rodando = False
             if obs['x'] < -TAMANHO_OBSTACULO or obs['x'] > LARGURA or obs['y'] < -TAMANHO_OBSTACULO or obs['y'] > ALTURA:
