@@ -59,7 +59,7 @@ def menu():
         titulo = font.render("Desvie dos projéteis", True, BRANCO)
         TELA.blit(titulo, (LARGURA // 2 - titulo.get_width() // 2, 100))
 
-        # Centralizando o botão de jogar
+        # Centralização
         botao_jogar = pygame.Rect(LARGURA // 2 - 100, 300, 200, 50)
     
         texto_jogar = font.render("Jogar", True, BRANCO)
@@ -78,15 +78,15 @@ def menu():
 def tela_morte(tempo_jogo):
     rodando = True
     while rodando:
-        TELA.blit(menu_fundo, (0, 0))  # Usando a mesma imagem do menu
+        TELA.blit(menu_fundo, (0, 0)) 
         titulo = font.render("Você perdeu!", True, BRANCO)
         TELA.blit(titulo, (LARGURA // 2 - titulo.get_width() // 2, 100))
 
-        # Exibindo o tempo de jogo final
+        
         tempo_final = font.render(f" Recorde: {tempo_jogo}s", True, BRANCO)
         TELA.blit(tempo_final, (LARGURA // 2 - tempo_final.get_width() // 2, 200))
 
-        # Botões de "Jogar novamente" e "Sair"
+        
         botao_jogar_novamente = pygame.Rect(LARGURA // 2 - 220, 300, 200, 50)
         botao_sair = pygame.Rect(LARGURA // 2 + 20, 300, 200, 50)
     
@@ -103,10 +103,10 @@ def tela_morte(tempo_jogo):
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if botao_jogar_novamente.collidepoint(event.pos):
-                    return True  # Jogar novamente
+                    return True  
                 elif botao_sair.collidepoint(event.pos):
                     pygame.quit()
-                    exit()  # Sair do jogo
+                    exit()  
 
 def main():
     global VEL_OBSTACULO, aumentos_restantes, tempo_ultimo_aumento, time_geracao_obstaculo, recorde_tempo
@@ -159,7 +159,7 @@ def main():
             if math.dist((obs['x'], obs['y']), (jogador_x, jogador_y)) < JOGADOR_TAMANHO // 2 + TAMANHO_OBSTACULO // 2:
                 if tempo_jogo > recorde_tempo:
                     recorde_tempo = tempo_jogo
-                if tela_morte(tempo_jogo):  # Chama a tela de morte e reinicia o jogo se o jogador clicar em "Jogar novamente"
+                if tela_morte(tempo_jogo):  # jogar de novo
                     main()
                 rodando = False
             if obs['x'] < -TAMANHO_OBSTACULO or obs['x'] > LARGURA or obs['y'] < -TAMANHO_OBSTACULO or obs['y'] > ALTURA:
