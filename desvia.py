@@ -170,8 +170,8 @@ def main():
         for obs in obstaculos:
             desenhar_triangulo(TELA, VERMELHO, (int(obs['x']), int(obs['y'])), TAMANHO_OBSTACULO // 2, obs['angulo'])
 
-        tempo_texto = font.render(f"Tempo: {tempo_jogo}s", True, PRETO)
-        recorde_texto = font.render(f"Recorde: {recorde_tempo}s", True, PRETO)
+        tempo_texto = font.render(f"Tempo: {tempo_jogo}s", True, BRANCO)
+        recorde_texto = font.render(f"Recorde: {recorde_tempo}s", True, BRANCO)
         TELA.blit(tempo_texto, (10, 10))
         TELA.blit(recorde_texto, (10, 50))
 
