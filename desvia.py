@@ -1,5 +1,3 @@
-#By JG
-
 import pygame
 import random
 import math
@@ -18,13 +16,14 @@ PRETO = (0, 0, 0)
 JOGADOR_TAMANHO = 30
 obstaculos = []
 TAMANHO_OBSTACULO = 40
-VEL_OBSTACULO = 3.5
-MAX_VELOCIDADE = 7.0
-AUMENTOS_VELOCIDADE = 6
+VEL_OBSTACULO = 26
+MAX_VELOCIDADE = 60
+AUMENTOS_VELOCIDADE = 30
 aumentos_restantes = AUMENTOS_VELOCIDADE
 tempo_ultimo_aumento = pygame.time.get_ticks()
 intervalo_aumento = 6000
 time_geracao_obstaculo = 1000
+
 clock = pygame.time.Clock()
 GERACAO_OBSTACULO = pygame.USEREVENT + 1
 pygame.time.set_timer(GERACAO_OBSTACULO, time_geracao_obstaculo)
@@ -61,9 +60,7 @@ def menu():
         titulo = font.render("Desvie dos projéteis", True, BRANCO)
         TELA.blit(titulo, (LARGURA // 2 - titulo.get_width() // 2, 100))
 
-    
         botao_jogar = pygame.Rect(LARGURA // 2 - 100, 300, 200, 50)
-    
         texto_jogar = font.render("Jogar", True, BRANCO)
         TELA.blit(texto_jogar, (botao_jogar.x + 75, botao_jogar.y + 10))
 
@@ -80,18 +77,15 @@ def menu():
 def tela_morte(tempo_jogo):
     rodando = True
     while rodando:
-        TELA.blit(menu_fundo, (0, 0)) 
+        TELA.blit(menu_fundo, (0, 0))
         titulo = font.render("Você perdeu!", True, BRANCO)
         TELA.blit(titulo, (LARGURA // 2 - titulo.get_width() // 2, 100))
 
-        
         tempo_final = font.render(f" Recorde: {tempo_jogo}s", True, BRANCO)
         TELA.blit(tempo_final, (LARGURA // 2 - tempo_final.get_width() // 2, 200))
 
-        
         botao_jogar_novamente = pygame.Rect(LARGURA // 2 - 220, 300, 200, 50)
         botao_sair = pygame.Rect(LARGURA // 2 + 20, 300, 200, 50)
-    
         texto_jogar_novamente = font.render("Jogar novamente", True, BRANCO)
         texto_sair = font.render("Sair", True, BRANCO)
         TELA.blit(texto_jogar_novamente, (botao_jogar_novamente.x + 25, botao_jogar_novamente.y + 10))
@@ -105,13 +99,22 @@ def tela_morte(tempo_jogo):
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if botao_jogar_novamente.collidepoint(event.pos):
-                    return True  
+                    return True
                 elif botao_sair.collidepoint(event.pos):
                     pygame.quit()
-                    exit()  
+                    exit()
 
 def main():
-    global VEL_OBSTACULO, aumentos_restantes, tempo_ultimo_aumento, time_geracao_obstaculo, recorde_tempo
+    global VEL_OBSTACULO, aumentos_restantes, tempo_ultimo_aumento, time_geracao_obstaculo, recorde_tempo, obstaculos
+
+    # Resetar todas as variáveis para o estado inicial
+    VEL_OBSTACULO = 26
+    aumentos_restantes = AUMENTOS_VELOCIDADE
+    time_geracao_obstaculo = 1000
+    tempo_ultimo_aumento = pygame.time.get_ticks()
+    obstaculos.clear()
+    pygame.time.set_timer(GERACAO_OBSTACULO, time_geracao_obstaculo)
+
     jogador_x, jogador_y = LARGURA // 2, ALTURA // 2
     rodando = True
     tempo_inicio = pygame.time.get_ticks()
@@ -161,8 +164,8 @@ def main():
             if math.dist((obs['x'], obs['y']), (jogador_x, jogador_y)) < JOGADOR_TAMANHO // 2 + TAMANHO_OBSTACULO // 2:
                 if tempo_jogo > recorde_tempo:
                     recorde_tempo = tempo_jogo
-                if tela_morte(tempo_jogo):  
-                    main()
+                if tela_morte(tempo_jogo):
+                    main()  # Reinicia o jogo
                 rodando = False
             if obs['x'] < -TAMANHO_OBSTACULO or obs['x'] > LARGURA or obs['y'] < -TAMANHO_OBSTACULO or obs['y'] > ALTURA:
                 obstaculos.remove(obs)
