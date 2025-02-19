@@ -1,5 +1,3 @@
-#By JG
-
 import pygame
 import random
 import math
@@ -13,21 +11,28 @@ pygame.display.set_caption("Desvie dos projéteis")
 BRANCO = (255, 255, 255)
 VERMELHO = (255, 0, 0)
 AZUL = (0, 0, 255)
+VERDE = (0, 255, 0)
+AMARELO = (255, 255, 0)
 PRETO = (0, 0, 0)
 
 JOGADOR_TAMANHO = 30
 obstaculos = []
+tiros = []
 TAMANHO_OBSTACULO = 40
-VEL_OBSTACULO = 3.5
-MAX_VELOCIDADE = 7.0
-AUMENTOS_VELOCIDADE = 6
+VEL_OBSTACULO = 26
+VELOCIDADE_TIRO = 15
+MAX_VELOCIDADE = 60
+AUMENTOS_VELOCIDADE = 30
 aumentos_restantes = AUMENTOS_VELOCIDADE
 tempo_ultimo_aumento = pygame.time.get_ticks()
 intervalo_aumento = 6000
 time_geracao_obstaculo = 1000
+
 clock = pygame.time.Clock()
 GERACAO_OBSTACULO = pygame.USEREVENT + 1
+GERACAO_OBSTACULO_VERDE = pygame.USEREVENT + 2
 pygame.time.set_timer(GERACAO_OBSTACULO, time_geracao_obstaculo)
+pygame.time.set_timer(GERACAO_OBSTACULO_VERDE, 3000)
 
 font = pygame.font.Font(None, 36)
 
@@ -61,9 +66,7 @@ def menu():
         titulo = font.render("Desvie dos projéteis", True, BRANCO)
         TELA.blit(titulo, (LARGURA // 2 - titulo.get_width() // 2, 100))
 
-    
         botao_jogar = pygame.Rect(LARGURA // 2 - 100, 300, 200, 50)
-    
         texto_jogar = font.render("Jogar", True, BRANCO)
         TELA.blit(texto_jogar, (botao_jogar.x + 75, botao_jogar.y + 10))
 
@@ -80,18 +83,15 @@ def menu():
 def tela_morte(tempo_jogo):
     rodando = True
     while rodando:
-        TELA.blit(menu_fundo, (0, 0)) 
+        TELA.blit(menu_fundo, (0, 0))
         titulo = font.render("Você perdeu!", True, BRANCO)
         TELA.blit(titulo, (LARGURA // 2 - titulo.get_width() // 2, 100))
 
-        
         tempo_final = font.render(f" Recorde: {tempo_jogo}s", True, BRANCO)
         TELA.blit(tempo_final, (LARGURA // 2 - tempo_final.get_width() // 2, 200))
 
-        
         botao_jogar_novamente = pygame.Rect(LARGURA // 2 - 220, 300, 200, 50)
         botao_sair = pygame.Rect(LARGURA // 2 + 20, 300, 200, 50)
-    
         texto_jogar_novamente = font.render("Jogar novamente", True, BRANCO)
         texto_sair = font.render("Sair", True, BRANCO)
         TELA.blit(texto_jogar_novamente, (botao_jogar_novamente.x + 25, botao_jogar_novamente.y + 10))
@@ -105,13 +105,24 @@ def tela_morte(tempo_jogo):
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if botao_jogar_novamente.collidepoint(event.pos):
-                    return True  
+                    return True
                 elif botao_sair.collidepoint(event.pos):
                     pygame.quit()
-                    exit()  
+                    exit()
 
 def main():
-    global VEL_OBSTACULO, aumentos_restantes, tempo_ultimo_aumento, time_geracao_obstaculo, recorde_tempo
+    global VEL_OBSTACULO, aumentos_restantes, tempo_ultimo_aumento, time_geracao_obstaculo, recorde_tempo, obstaculos
+
+    # Resetar todas as variáveis para o estado inicial
+    VEL_OBSTACULO = 26
+    aumentos_restantes = AUMENTOS_VELOCIDADE
+    time_geracao_obstaculo = 1000
+    tempo_ultimo_aumento = pygame.time.get_ticks()
+    obstaculos.clear()
+    tiros.clear()
+    pygame.time.set_timer(GERACAO_OBSTACULO, time_geracao_obstaculo)
+    pygame.time.set_timer(GERACAO_OBSTACULO_VERDE, 3000)
+
     jogador_x, jogador_y = LARGURA // 2, ALTURA // 2
     rodando = True
     tempo_inicio = pygame.time.get_ticks()
@@ -147,7 +158,28 @@ def main():
 
                 dx, dy = calcular_direcao(x, y, jogador_x, jogador_y, VEL_OBSTACULO)
                 angulo = math.degrees(math.atan2(-dy, dx))
-                obstaculos.append({'x': x, 'y': y, 'dx': dx, 'dy': dy, 'angulo': angulo})
+                obstaculos.append({'x': x, 'y': y, 'dx': dx, 'dy': dy, 'angulo': angulo, 'cor': VERMELHO})
+            
+            elif event.type == GERACAO_OBSTACULO_VERDE:
+                lado = random.choice(['E', 'D', 'C', 'B'])
+                
+                if lado == 'E':
+                    x, y = 0, random.randint(0, ALTURA)
+                elif lado == 'D':
+                    x, y = LARGURA, random.randint(0, ALTURA)
+                elif lado == 'C':
+                    x, y = random.randint(0, LARGURA), 0
+                else:
+                    x, y = random.randint(0, LARGURA), ALTURA
+
+                dx, dy = calcular_direcao(x, y, jogador_x, jogador_y, VEL_OBSTACULO)
+                angulo = math.degrees(math.atan2(-dy, dx))
+                obstaculos.append({'x': x, 'y': y, 'dx': dx, 'dy': dy, 'angulo': angulo, 'cor': VERDE})
+            
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+                dx, dy = calcular_direcao(jogador_x, jogador_y, mouse_x, mouse_y, VELOCIDADE_TIRO)
+                tiros.append({'x': jogador_x, 'y': jogador_y, 'dx': dx, 'dy': dy})
 
         mouse_x, mouse_y = pygame.mouse.get_pos()
         jogador_x += (mouse_x - jogador_x) * 0.2
@@ -155,20 +187,47 @@ def main():
 
         pygame.draw.circle(TELA, AZUL, (int(jogador_x), int(jogador_y)), JOGADOR_TAMANHO // 2)
 
+        # Atualizar projéteis
+        for tiro in tiros[:]:
+            tiro['x'] += tiro['dx']
+            tiro['y'] += tiro['dy']
+            
+            # Remover tiros fora da tela
+            if (tiro['x'] < 0 or tiro['x'] > LARGURA or 
+                tiro['y'] < 0 or tiro['y'] > ALTURA):
+                tiros.remove(tiro)
+            else:
+                # Verificar colisões com obstáculos verdes
+                for obs in obstaculos[:]:
+                    if obs['cor'] == VERDE:
+                        distancia = math.hypot(tiro['x'] - obs['x'], tiro['y'] - obs['y'])
+                        if distancia < TAMANHO_OBSTACULO//2 + 5:
+                            try:
+                                obstaculos.remove(obs)
+                                tiros.remove(tiro)
+                            except ValueError:
+                                pass
+
+        # Desenhar tiros
+        for tiro in tiros:
+            pygame.draw.rect(TELA, AMARELO, (int(tiro['x']-2), int(tiro['y']-2), 5, 5))
+
+        # Atualizar obstáculos
         for obs in obstaculos[:]:
             obs['x'] += obs['dx']
             obs['y'] += obs['dy']
-            if math.dist((obs['x'], obs['y']), (jogador_x, jogador_y)) < JOGADOR_TAMANHO // 2 + TAMANHO_OBSTACULO // 2:
+            if math.dist((obs['x'], obs['y']), (jogador_x, jogador_y)) < JOGADOR_TAMANHO//2 + TAMANHO_OBSTACULO//2:
                 if tempo_jogo > recorde_tempo:
                     recorde_tempo = tempo_jogo
-                if tela_morte(tempo_jogo):  
+                if tela_morte(tempo_jogo):
                     main()
                 rodando = False
             if obs['x'] < -TAMANHO_OBSTACULO or obs['x'] > LARGURA or obs['y'] < -TAMANHO_OBSTACULO or obs['y'] > ALTURA:
                 obstaculos.remove(obs)
 
+        # Desenhar obstáculos
         for obs in obstaculos:
-            desenhar_triangulo(TELA, VERMELHO, (int(obs['x']), int(obs['y'])), TAMANHO_OBSTACULO // 2, obs['angulo'])
+            desenhar_triangulo(TELA, obs['cor'], (int(obs['x']), int(obs['y'])), TAMANHO_OBSTACULO//2, obs['angulo'])
 
         tempo_texto = font.render(f"Tempo: {tempo_jogo}s", True, BRANCO)
         recorde_texto = font.render(f"Recorde: {recorde_tempo}s", True, BRANCO)
