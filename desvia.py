@@ -6,7 +6,7 @@ pygame.init()
 info = pygame.display.Info()
 LARGURA, ALTURA = info.current_w, info.current_h
 TELA = pygame.display.set_mode((LARGURA, ALTURA), pygame.FULLSCREEN)
-pygame.display.set_caption("Desvie dos projéteis")
+pygame.display.set_caption("Duǒshǎn")
 
 BRANCO = (255, 255, 255)
 VERMELHO = (255, 0, 0)
@@ -65,12 +65,12 @@ def menu():
     rodando = True
     while rodando:
         TELA.blit(menu_fundo, (0, 0))
-        titulo = font.render("Desvie dos projéteis", True, BRANCO)
+        titulo = font.render("Duǒshǎn", True, BRANCO)
         TELA.blit(titulo, (LARGURA // 2 - titulo.get_width() // 2, 100))
 
-        # Texto de instrução
-        texto_instrucao = font.render("Clique com o botão ESQUERDO do mouse para atirar nos projéteis verdes", True, BRANCO)
-        TELA.blit(texto_instrucao, (LARGURA // 2 - texto_instrucao.get_width() // 2, 250))
+        
+        texto_instrucao = font.render("Clique com o botão esquerdo do mouse para atirar nos projéteis verdes", True, BRANCO)
+        TELA.blit(texto_instrucao, (LARGURA // 2 - texto_instrucao.get_width() // 2, 230))
 
         botao_jogar = pygame.Rect(LARGURA // 2 - 100, 300, 200, 50)
         texto_jogar = font.render("Jogar", True, BRANCO)
@@ -249,7 +249,7 @@ def main():
             if obs['x'] < -TAMANHO_Projétil or obs['x'] > LARGURA or obs['y'] < -TAMANHO_Projétil or obs['y'] > ALTURA:
                 Projétils.remove(obs)
 
-        # Fazer obstáculos
+        # Fazer projetil
         for obs in Projétils:
             desenhar_triangulo(TELA, obs['cor'], (int(obs['x']), int(obs['y'])), TAMANHO_Projétil//2, obs['angulo'])
 
