@@ -12,27 +12,29 @@ BRANCO = (255, 255, 255)
 VERMELHO = (255, 0, 0)
 AZUL = (0, 0, 255)
 VERDE = (0, 255, 0)
-AMARELO = (255, 255, 0)
+CIANO = (0, 255, 255)
 PRETO = (0, 0, 0)
 
 JOGADOR_TAMANHO = 30
-obstaculos = []
+Projétils = []
 tiros = []
-TAMANHO_OBSTACULO = 40
-VEL_OBSTACULO = 26
-VELOCIDADE_TIRO = 15
-MAX_VELOCIDADE = 60
-AUMENTOS_VELOCIDADE = 30
+TAMANHO_Projétil = 40
+VEL_Projétil = 11
+VEL_Projétil_VERDE = 11  
+VELOCIDADE_TIRO = 16
+TAMANHO_TIRO = 11 
+MAX_VELOCIDADE = 36
+AUMENTOS_VELOCIDADE = 16
 aumentos_restantes = AUMENTOS_VELOCIDADE
 tempo_ultimo_aumento = pygame.time.get_ticks()
 intervalo_aumento = 6000
-time_geracao_obstaculo = 1000
+time_geracao_Projétil = 600
 
 clock = pygame.time.Clock()
-GERACAO_OBSTACULO = pygame.USEREVENT + 1
-GERACAO_OBSTACULO_VERDE = pygame.USEREVENT + 2
-pygame.time.set_timer(GERACAO_OBSTACULO, time_geracao_obstaculo)
-pygame.time.set_timer(GERACAO_OBSTACULO_VERDE, 3000)
+GERACAO_Projétil = pygame.USEREVENT + 1
+GERACAO_Projétil_VERDE = pygame.USEREVENT + 2
+pygame.time.set_timer(GERACAO_Projétil, time_geracao_Projétil)
+pygame.time.set_timer(GERACAO_Projétil_VERDE, 3000)
 
 font = pygame.font.Font(None, 36)
 
@@ -65,6 +67,10 @@ def menu():
         TELA.blit(menu_fundo, (0, 0))
         titulo = font.render("Desvie dos projéteis", True, BRANCO)
         TELA.blit(titulo, (LARGURA // 2 - titulo.get_width() // 2, 100))
+
+        # Texto de instrução
+        texto_instrucao = font.render("Clique com o botão ESQUERDO do mouse para atirar nos projéteis verdes", True, BRANCO)
+        TELA.blit(texto_instrucao, (LARGURA // 2 - texto_instrucao.get_width() // 2, 250))
 
         botao_jogar = pygame.Rect(LARGURA // 2 - 100, 300, 200, 50)
         texto_jogar = font.render("Jogar", True, BRANCO)
@@ -111,17 +117,16 @@ def tela_morte(tempo_jogo):
                     exit()
 
 def main():
-    global VEL_OBSTACULO, aumentos_restantes, tempo_ultimo_aumento, time_geracao_obstaculo, recorde_tempo, obstaculos
+    global VEL_Projétil, aumentos_restantes, tempo_ultimo_aumento, time_geracao_Projétil, recorde_tempo, Projétils
 
-    # Resetar todas as variáveis para o estado inicial
-    VEL_OBSTACULO = 26
+    VEL_Projétil = 26
     aumentos_restantes = AUMENTOS_VELOCIDADE
-    time_geracao_obstaculo = 1000
+    time_geracao_Projétil = 1000
     tempo_ultimo_aumento = pygame.time.get_ticks()
-    obstaculos.clear()
+    Projétils.clear()
     tiros.clear()
-    pygame.time.set_timer(GERACAO_OBSTACULO, time_geracao_obstaculo)
-    pygame.time.set_timer(GERACAO_OBSTACULO_VERDE, 3000)
+    pygame.time.set_timer(GERACAO_Projétil, time_geracao_Projétil)
+    pygame.time.set_timer(GERACAO_Projétil_VERDE, 3000)
 
     jogador_x, jogador_y = LARGURA // 2, ALTURA // 2
     rodando = True
@@ -135,16 +140,16 @@ def main():
         tempo_jogo = (tempo_atual - tempo_inicio) // 1000
 
         if tempo_atual - tempo_ultimo_aumento >= intervalo_aumento and aumentos_restantes > 0:
-            VEL_OBSTACULO = min(VEL_OBSTACULO + 1.0, MAX_VELOCIDADE)
+            VEL_Projétil = min(VEL_Projétil + 1.0, MAX_VELOCIDADE)
             aumentos_restantes -= 1
             tempo_ultimo_aumento = tempo_atual
-            time_geracao_obstaculo = max(500, time_geracao_obstaculo - 100)
-            pygame.time.set_timer(GERACAO_OBSTACULO, time_geracao_obstaculo)
+            time_geracao_Projétil = max(500, time_geracao_Projétil - 100)
+            pygame.time.set_timer(GERACAO_Projétil, time_geracao_Projétil)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 rodando = False
-            elif event.type == GERACAO_OBSTACULO:
+            elif event.type == GERACAO_Projétil:
                 lado = random.choice(['E', 'D', 'C', 'B'])
 
                 if lado == 'E':
@@ -156,11 +161,11 @@ def main():
                 else:
                     x, y = random.randint(0, LARGURA), ALTURA
 
-                dx, dy = calcular_direcao(x, y, jogador_x, jogador_y, VEL_OBSTACULO)
+                dx, dy = calcular_direcao(x, y, jogador_x, jogador_y, VEL_Projétil)
                 angulo = math.degrees(math.atan2(-dy, dx))
-                obstaculos.append({'x': x, 'y': y, 'dx': dx, 'dy': dy, 'angulo': angulo, 'cor': VERMELHO})
+                Projétils.append({'x': x, 'y': y, 'dx': dx, 'dy': dy, 'angulo': angulo, 'cor': VERMELHO})
             
-            elif event.type == GERACAO_OBSTACULO_VERDE:
+            elif event.type == GERACAO_Projétil_VERDE:
                 lado = random.choice(['E', 'D', 'C', 'B'])
                 
                 if lado == 'E':
@@ -172,14 +177,23 @@ def main():
                 else:
                     x, y = random.randint(0, LARGURA), ALTURA
 
-                dx, dy = calcular_direcao(x, y, jogador_x, jogador_y, VEL_OBSTACULO)
+                dx, dy = calcular_direcao(x, y, jogador_x, jogador_y, VEL_Projétil_VERDE)
                 angulo = math.degrees(math.atan2(-dy, dx))
-                obstaculos.append({'x': x, 'y': y, 'dx': dx, 'dy': dy, 'angulo': angulo, 'cor': VERDE})
+                Projétils.append({'x': x, 'y': y, 'dx': dx, 'dy': dy, 'angulo': angulo, 'cor': VERDE})
             
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mouse_x, mouse_y = pygame.mouse.get_pos()
-                dx, dy = calcular_direcao(jogador_x, jogador_y, mouse_x, mouse_y, VELOCIDADE_TIRO)
-                tiros.append({'x': jogador_x, 'y': jogador_y, 'dx': dx, 'dy': dy})
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  
+                    alvo = None
+                    min_dist = float('inf')
+                    for obs in Projétils:
+                        if obs['cor'] == VERDE:
+                            dist = math.dist((jogador_x, jogador_y), (obs['x'], obs['y']))
+                            if dist < min_dist:
+                                min_dist = dist
+                                alvo = obs
+                    if alvo:
+                        dx, dy = calcular_direcao(jogador_x, jogador_y, alvo['x'], alvo['y'], VELOCIDADE_TIRO)
+                        tiros.append({'x': jogador_x, 'y': jogador_y, 'dx': dx, 'dy': dy, 'tamanho': TAMANHO_TIRO, 'cor': CIANO})
 
         mouse_x, mouse_y = pygame.mouse.get_pos()
         jogador_x += (mouse_x - jogador_x) * 0.2
@@ -192,42 +206,52 @@ def main():
             tiro['x'] += tiro['dx']
             tiro['y'] += tiro['dy']
             
-            # Remover tiros fora da tela
             if (tiro['x'] < 0 or tiro['x'] > LARGURA or 
                 tiro['y'] < 0 or tiro['y'] > ALTURA):
                 tiros.remove(tiro)
             else:
-                # Verificar colisões com obstáculos verdes
-                for obs in obstaculos[:]:
+                for obs in Projétils[:]:
                     if obs['cor'] == VERDE:
                         distancia = math.hypot(tiro['x'] - obs['x'], tiro['y'] - obs['y'])
-                        if distancia < TAMANHO_OBSTACULO//2 + 5:
+                        tiro_raio = tiro['tamanho'] // 2
+                        obs_raio = TAMANHO_Projétil // 2
+                        if distancia < tiro_raio + obs_raio:
                             try:
-                                obstaculos.remove(obs)
+                                Projétils.remove(obs)
                                 tiros.remove(tiro)
                             except ValueError:
                                 pass
 
         # Desenhar tiros
         for tiro in tiros:
-            pygame.draw.rect(TELA, AMARELO, (int(tiro['x']-2), int(tiro['y']-2), 5, 5))
+            pygame.draw.rect(TELA, tiro['cor'], (
+                int(tiro['x'] - tiro['tamanho']//2), 
+                int(tiro['y'] - tiro['tamanho']//2), 
+                tiro['tamanho'], 
+                tiro['tamanho']
+            ))  
 
-        # Atualizar obstáculos
-        for obs in obstaculos[:]:
+        # Atualizar projetil (verdes seguem o jogador)
+        for obs in Projétils[:]:
+            if obs['cor'] == VERDE:
+                dx, dy = calcular_direcao(obs['x'], obs['y'], jogador_x, jogador_y, VEL_Projétil_VERDE)
+                obs['dx'] = dx
+                obs['dy'] = dy
+                obs['angulo'] = math.degrees(math.atan2(-dy, dx))
             obs['x'] += obs['dx']
             obs['y'] += obs['dy']
-            if math.dist((obs['x'], obs['y']), (jogador_x, jogador_y)) < JOGADOR_TAMANHO//2 + TAMANHO_OBSTACULO//2:
+            if math.dist((obs['x'], obs['y']), (jogador_x, jogador_y)) < JOGADOR_TAMANHO//2 + TAMANHO_Projétil//2:
                 if tempo_jogo > recorde_tempo:
                     recorde_tempo = tempo_jogo
                 if tela_morte(tempo_jogo):
                     main()
                 rodando = False
-            if obs['x'] < -TAMANHO_OBSTACULO or obs['x'] > LARGURA or obs['y'] < -TAMANHO_OBSTACULO or obs['y'] > ALTURA:
-                obstaculos.remove(obs)
+            if obs['x'] < -TAMANHO_Projétil or obs['x'] > LARGURA or obs['y'] < -TAMANHO_Projétil or obs['y'] > ALTURA:
+                Projétils.remove(obs)
 
-        # Desenhar obstáculos
-        for obs in obstaculos:
-            desenhar_triangulo(TELA, obs['cor'], (int(obs['x']), int(obs['y'])), TAMANHO_OBSTACULO//2, obs['angulo'])
+        # Fazer obstáculos
+        for obs in Projétils:
+            desenhar_triangulo(TELA, obs['cor'], (int(obs['x']), int(obs['y'])), TAMANHO_Projétil//2, obs['angulo'])
 
         tempo_texto = font.render(f"Tempo: {tempo_jogo}s", True, BRANCO)
         recorde_texto = font.render(f"Recorde: {recorde_tempo}s", True, BRANCO)
