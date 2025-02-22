@@ -6,7 +6,7 @@ pygame.init()
 info = pygame.display.Info()
 LARGURA, ALTURA = info.current_w, info.current_h
 TELA = pygame.display.set_mode((LARGURA, ALTURA), pygame.FULLSCREEN)
-pygame.display.set_caption("Duǒshǎn")
+pygame.display.set_caption("Dodge")
 
 BRANCO = (255, 255, 255)
 VERMELHO = (255, 0, 0)
@@ -19,7 +19,7 @@ JOGADOR_TAMANHO = 30
 Projétils = []
 tiros = []
 TAMANHO_Projétil = 40
-VEL_Projétil = 11
+VEL_Projétil = 21
 VEL_Projétil_VERDE = 11  
 VELOCIDADE_TIRO = 16
 TAMANHO_TIRO = 11 
@@ -34,7 +34,7 @@ clock = pygame.time.Clock()
 GERACAO_Projétil = pygame.USEREVENT + 1
 GERACAO_Projétil_VERDE = pygame.USEREVENT + 2
 pygame.time.set_timer(GERACAO_Projétil, time_geracao_Projétil)
-pygame.time.set_timer(GERACAO_Projétil_VERDE, 3000)
+pygame.time.set_timer(GERACAO_Projétil_VERDE, 6000)
 
 font = pygame.font.Font(None, 36)
 
@@ -65,7 +65,7 @@ def menu():
     rodando = True
     while rodando:
         TELA.blit(menu_fundo, (0, 0))
-        titulo = font.render("Duǒshǎn", True, BRANCO)
+        titulo = font.render("Dodge", True, BRANCO)
         TELA.blit(titulo, (LARGURA // 2 - titulo.get_width() // 2, 100))
 
         
@@ -119,14 +119,14 @@ def tela_morte(tempo_jogo):
 def main():
     global VEL_Projétil, aumentos_restantes, tempo_ultimo_aumento, time_geracao_Projétil, recorde_tempo, Projétils
 
-    VEL_Projétil = 26
+    VEL_Projétil = 21
     aumentos_restantes = AUMENTOS_VELOCIDADE
     time_geracao_Projétil = 1000
     tempo_ultimo_aumento = pygame.time.get_ticks()
     Projétils.clear()
     tiros.clear()
     pygame.time.set_timer(GERACAO_Projétil, time_geracao_Projétil)
-    pygame.time.set_timer(GERACAO_Projétil_VERDE, 3000)
+    pygame.time.set_timer(GERACAO_Projétil_VERDE, 916)
 
     jogador_x, jogador_y = LARGURA // 2, ALTURA // 2
     rodando = True
