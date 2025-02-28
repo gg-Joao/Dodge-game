@@ -26,19 +26,14 @@ VELOCIDADE_TIRO = 16
 TAMANHO_TIRO = 11
 MAX_VELOCIDADE = 36
 AUMENTOS_VELOCIDADE = 16
-DISTANCIA_MINIMA_SPAWN = 660
+DISTANCIA_MINIMA_SPAWN = 600
 aumentos_restantes = AUMENTOS_VELOCIDADE
 intervalo_aumento = 6000
 time_geracao_projetil = 600
 TAMANHO_BOLA_CHEFE = 60
 VEL_BOLA_CHEFE = 11
-<<<<<<< HEAD
 VEL_BOLA_CHEFE_CINZA = 11
 SAUDE_BOLA_CHEFE = 23
-=======
-VEL_BOLA_CHEFE_CINZA = 16
-SAUDE_BOLA_CHEFE = 30
->>>>>>> d30a4f3edffc9523b335d5a04a50f1310dbb5cc1
 
 # Variáveis do jogo
 projeteis = []
@@ -170,11 +165,7 @@ def main():
                 })
 
         # Lógica de ativação do chefe cinza
-<<<<<<< HEAD
         if tempo_jogo >= 50 and not BOSS_CINZA_ACTIVE and len(boss_cinzas) == 0:  
-=======
-        if tempo_jogo >= 40 and not BOSS_CINZA_ACTIVE and len(boss_cinzas) == 0:  
->>>>>>> d30a4f3edffc9523b335d5a04a50f1310dbb5cc1
             BOSS_CINZA_ACTIVE = True
             for _ in range(3):
                 boss_cinzas.append({
