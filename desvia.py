@@ -277,7 +277,7 @@ def main():
                         boss_cinzas.remove(boss)
                     break
 
-        # Atualização de projéteis
+        # Att de projetil 
         for obs in projeteis[:]:
             if obs['cor'] == VERDE:
                 dx, dy = calcular_direcao(obs['x'], obs['y'], jogador_x, jogador_y, VEL_PROJETIL_VERDE)
@@ -321,7 +321,7 @@ def main():
                     main()
                 rodando = False
 
-        # Verificação da vitória do chefe amarelo  
+        # Verif da vitória do chefe amarelo  
         if BOSS_ACTIVE and len(boss_balls) == 0:
             BOSS_ACTIVE = False
             BOSS_DERROTADO = True
@@ -329,13 +329,12 @@ def main():
             pygame.time.set_timer(GERACAO_PROJETIL_VERDE, 6000)  
             projeteis.clear()
 
-        # Verificação da vitória do chefe cinza 
+        # Verif da vitória do chefe cinza 
         if BOSS_CINZA_ACTIVE and len(boss_cinzas) == 0:
             BOSS_CINZA_ACTIVE = False
-            # Reativar a geração de projéteis normais
             pygame.time.set_timer(GERACAO_PROJETIL, time_geracao_projetil)  
             pygame.time.set_timer(GERACAO_PROJETIL_VERDE, 6000)  
-            projeteis.clear()  # Limpa os projéteis existentes, se necessário
+            projeteis.clear()  
 
         for obs in projeteis:
             desenhar_triangulo(TELA, obs['cor'], (int(obs['x']), int(obs['y'])), TAMANHO_PROJETIL // 2, obs['angulo'])
