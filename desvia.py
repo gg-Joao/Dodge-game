@@ -8,43 +8,58 @@ LARGURA, ALTURA = info.current_w, info.current_h
 TELA = pygame.display.set_mode((LARGURA, ALTURA), pygame.FULLSCREEN)
 pygame.display.set_caption("Dodge")
 
+# Cores
 BRANCO = (255, 255, 255)
 VERMELHO = (255, 0, 0)
 AZUL = (0, 0, 255)
 VERDE = (0, 255, 0)
 CIANO = (0, 255, 255)
+AMARELO = (255, 255, 0)
+CINZA = (128, 128, 128) 
 PRETO = (0, 0, 0)
 
+
 JOGADOR_TAMANHO = 30
-Projétils = []
-tiros = []
-TAMANHO_Projétil = 40
-VEL_Projétil = 21
-VEL_Projétil_VERDE = 11  
+
+
+TAMANHO_PROJETIL = 40
+VEL_PROJETIL = 21
+VEL_PROJETIL_VERDE = 11
 VELOCIDADE_TIRO = 16
-TAMANHO_TIRO = 11 
+TAMANHO_TIRO = 11
 MAX_VELOCIDADE = 36
 AUMENTOS_VELOCIDADE = 16
+DISTANCIA_MINIMA_SPAWN = 300
 aumentos_restantes = AUMENTOS_VELOCIDADE
-tempo_ultimo_aumento = pygame.time.get_ticks()
 intervalo_aumento = 6000
-time_geracao_Projétil = 600
+time_geracao_projetil = 600
+
+
+TAMANHO_BOLA_CHEFE = 60
+VEL_BOLA_CHEFE = 4
+VEL_BOLA_CHEFE_CINZA = 6 
+SAUDE_BOLA_CHEFE = 30
+
+# Variáveis do jogo
+projeteis = []
+tiros = []
+boss_balls = []
+boss_cinzas = [] 
+BOSS_ACTIVE = False
+BOSS_CINZA_ACTIVE = False  #
+recorde_tempo = 0
+BOSS_DERROTADO = False
 
 clock = pygame.time.Clock()
-GERACAO_Projétil = pygame.USEREVENT + 1
-GERACAO_Projétil_VERDE = pygame.USEREVENT + 2
-pygame.time.set_timer(GERACAO_Projétil, time_geracao_Projétil)
-pygame.time.set_timer(GERACAO_Projétil_VERDE, 6000)
+GERACAO_PROJETIL = pygame.USEREVENT + 1
+GERACAO_PROJETIL_VERDE = pygame.USEREVENT + 2
+
 
 font = pygame.font.Font(None, 36)
-
 fundo = pygame.image.load("ao.jpg")
 fundo = pygame.transform.scale(fundo, (LARGURA, ALTURA))
-
 menu_fundo = pygame.image.load("menu-.jpg")
 menu_fundo = pygame.transform.scale(menu_fundo, (LARGURA, ALTURA))
-
-recorde_tempo = 0
 
 def calcular_direcao(x_inicial, y_inicial, destino_x, destino_y, velocidade):
     dx = destino_x - x_inicial
@@ -68,8 +83,7 @@ def menu():
         titulo = font.render("Dodge", True, BRANCO)
         TELA.blit(titulo, (LARGURA // 2 - titulo.get_width() // 2, 100))
 
-        
-        texto_instrucao = font.render("Clique com o botão esquerdo do mouse para atirar nos projéteis verdes", True, BRANCO)
+        texto_instrucao = font.render("Clique com o botão esquerdo do mouse para atirar nos projéteis verdes e nos bosses", True, BRANCO)
         TELA.blit(texto_instrucao, (LARGURA // 2 - texto_instrucao.get_width() // 2, 230))
 
         botao_jogar = pygame.Rect(LARGURA // 2 - 100, 300, 200, 50)
@@ -117,142 +131,243 @@ def tela_morte(tempo_jogo):
                     exit()
 
 def main():
-    global VEL_Projétil, aumentos_restantes, tempo_ultimo_aumento, time_geracao_Projétil, recorde_tempo, Projétils
+    global VEL_PROJETIL, aumentos_restantes, recorde_tempo, BOSS_ACTIVE, projeteis, tiros, boss_balls, BOSS_DERROTADO, BOSS_CINZA_ACTIVE, boss_cinzas
 
-    VEL_Projétil = 21
+   
+    VEL_PROJETIL = 13
     aumentos_restantes = AUMENTOS_VELOCIDADE
-    time_geracao_Projétil = 1000
-    tempo_ultimo_aumento = pygame.time.get_ticks()
-    Projétils.clear()
+    projeteis.clear()
     tiros.clear()
-    pygame.time.set_timer(GERACAO_Projétil, time_geracao_Projétil)
-    pygame.time.set_timer(GERACAO_Projétil_VERDE, 916)
+    boss_balls.clear()
+    boss_cinzas.clear()
+    BOSS_ACTIVE = False
+    BOSS_CINZA_ACTIVE = False
+    BOSS_DERROTADO = False
 
     jogador_x, jogador_y = LARGURA // 2, ALTURA // 2
-    rodando = True
     tempo_inicio = pygame.time.get_ticks()
+    tempo_ultimo_aumento = pygame.time.get_ticks()
 
+    pygame.time.set_timer(GERACAO_PROJETIL, time_geracao_projetil)
+    pygame.time.set_timer(GERACAO_PROJETIL_VERDE, 6000)
+
+    rodando = True
     while rodando:
         clock.tick(60)
         TELA.blit(fundo, (0, 0))
 
+        
         tempo_atual = pygame.time.get_ticks()
         tempo_jogo = (tempo_atual - tempo_inicio) // 1000
 
-        if tempo_atual - tempo_ultimo_aumento >= intervalo_aumento and aumentos_restantes > 0:
-            VEL_Projétil = min(VEL_Projétil + 1.0, MAX_VELOCIDADE)
-            aumentos_restantes -= 1
-            tempo_ultimo_aumento = tempo_atual
-            time_geracao_Projétil = max(500, time_geracao_Projétil - 100)
-            pygame.time.set_timer(GERACAO_Projétil, time_geracao_Projétil)
+        
+        if tempo_jogo >= 10 and not BOSS_ACTIVE and not BOSS_DERROTADO and len(boss_balls) == 0:
+            BOSS_ACTIVE = True
+            pygame.time.set_timer(GERACAO_PROJETIL, 0)  
+            pygame.time.set_timer(GERACAO_PROJETIL_VERDE, 0)  
+            for _ in range(3):
+                boss_balls.append({
+                    'x': random.randint(100, LARGURA - 100),
+                    'y': random.randint(100, ALTURA - 100),
+                    'saude': SAUDE_BOLA_CHEFE,
+                    'cor': AMARELO
+                })
 
+        # Lógica de ativação do chefe cinza
+        if tempo_jogo >= 40 and not BOSS_CINZA_ACTIVE and len(boss_cinzas) == 0 and not BOSS_ACTIVE:  
+            BOSS_CINZA_ACTIVE = True
+            for _ in range(3):
+                boss_cinzas.append({
+                    'x': random.randint(100, LARGURA - 100),
+                    'y': random.randint(100, ALTURA - 100),
+                    'saude': SAUDE_BOLA_CHEFE,
+                    'cor': CINZA
+                })
+
+        # Eventos
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 rodando = False
-            elif event.type == GERACAO_Projétil:
-                lado = random.choice(['E', 'D', 'C', 'B'])
-
-                if lado == 'E':
-                    x, y = 0, random.randint(0, ALTURA)
-                elif lado == 'D':
-                    x, y = LARGURA, random.randint(0, ALTURA)
-                elif lado == 'C':
-                    x, y = random.randint(0, LARGURA), 0
-                else:
-                    x, y = random.randint(0, LARGURA), ALTURA
-
-                dx, dy = calcular_direcao(x, y, jogador_x, jogador_y, VEL_Projétil)
-                angulo = math.degrees(math.atan2(-dy, dx))
-                Projétils.append({'x': x, 'y': y, 'dx': dx, 'dy': dy, 'angulo': angulo, 'cor': VERMELHO})
             
-            elif event.type == GERACAO_Projétil_VERDE:
+            if event.type == GERACAO_PROJETIL and not BOSS_ACTIVE and not BOSS_CINZA_ACTIVE:  
                 lado = random.choice(['E', 'D', 'C', 'B'])
+                while True:
+                    if lado == 'E': 
+                        x, y = 0, random.randint(0, ALTURA)
+                    elif lado == 'D': 
+                        x, y = LARGURA, random.randint(0, ALTURA)
+                    elif lado == 'C': 
+                        x, y = random.randint(0, LARGURA), 0
+                    else: 
+                        x, y = random.randint(0, LARGURA), ALTURA
+                    
+                    if math.hypot(x - jogador_x, y - jogador_y) > DISTANCIA_MINIMA_SPAWN:
+                        break
+
+                dx, dy = calcular_direcao(x, y, jogador_x, jogador_y, VEL_PROJETIL)
+                angulo = math.degrees(math.atan2(-dy, dx))
+                projeteis.append({'x': x, 'y': y, 'dx': dx, 'dy': dy, 'angulo': angulo, 'cor': VERMELHO})
+            
+            if event.type == GERACAO_PROJETIL_VERDE and not BOSS_ACTIVE and not BOSS_CINZA_ACTIVE:  
+                lado = random.choice(['E', 'D', 'C', 'B'])
+                while True:
+                    if lado == 'E': 
+                        x, y = 0, random.randint(0, ALTURA)
+                    elif lado == 'D': 
+                        x, y = LARGURA, random.randint(0, ALTURA)
+                    elif lado == 'C': 
+                        x, y = random.randint(0, LARGURA), 0
+                    else: 
+                        x, y = random.randint(0, LARGURA), ALTURA
+                    
+                    if math.hypot(x - jogador_x, y - jogador_y) > DISTANCIA_MINIMA_SPAWN:
+                        break
+
+                dx, dy = calcular_direcao(x, y, jogador_x, jogador_y, VEL_PROJETIL_VERDE)
+                angulo = math.degrees(math.atan2(-dy, dx))
+                projeteis.append({'x': x, 'y': y, 'dx': dx, 'dy': dy, 'angulo': angulo, 'cor': VERDE})
+            
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                alvo = None
+                min_dist = float('inf')
+                targets = projeteis + boss_balls + boss_cinzas if BOSS_ACTIVE or BOSS_CINZA_ACTIVE else projeteis
                 
-                if lado == 'E':
-                    x, y = 0, random.randint(0, ALTURA)
-                elif lado == 'D':
-                    x, y = LARGURA, random.randint(0, ALTURA)
-                elif lado == 'C':
-                    x, y = random.randint(0, LARGURA), 0
-                else:
-                    x, y = random.randint(0, LARGURA), ALTURA
+                for obs in targets:
+                    valid_target = (obs['cor'] == VERDE) if not BOSS_ACTIVE and not BOSS_CINZA_ACTIVE else True
+                    if valid_target:
+                        dist = math.dist((jogador_x, jogador_y), (obs['x'], obs['y']))
+                        if dist < min_dist:
+                            min_dist = dist
+                            alvo = obs
+                
+                if alvo:
+                    dx, dy = calcular_direcao(jogador_x, jogador_y, alvo['x'], alvo['y'], VELOCIDADE_TIRO)
+                    tiros.append({'x': jogador_x, 'y': jogador_y, 'dx': dx, 'dy': dy, 'tamanho': TAMANHO_TIRO, 'cor': CIANO})
 
-                dx, dy = calcular_direcao(x, y, jogador_x, jogador_y, VEL_Projétil_VERDE)
-                angulo = math.degrees(math.atan2(-dy, dx))
-                Projétils.append({'x': x, 'y': y, 'dx': dx, 'dy': dy, 'angulo': angulo, 'cor': VERDE})
-            
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  
-                    alvo = None
-                    min_dist = float('inf')
-                    for obs in Projétils:
-                        if obs['cor'] == VERDE:
-                            dist = math.dist((jogador_x, jogador_y), (obs['x'], obs['y']))
-                            if dist < min_dist:
-                                min_dist = dist
-                                alvo = obs
-                    if alvo:
-                        dx, dy = calcular_direcao(jogador_x, jogador_y, alvo['x'], alvo['y'], VELOCIDADE_TIRO)
-                        tiros.append({'x': jogador_x, 'y': jogador_y, 'dx': dx, 'dy': dy, 'tamanho': TAMANHO_TIRO, 'cor': CIANO})
-
+        # Movimento do jogador
         mouse_x, mouse_y = pygame.mouse.get_pos()
         jogador_x += (mouse_x - jogador_x) * 0.2
         jogador_y += (mouse_y - jogador_y) * 0.2
-
         pygame.draw.circle(TELA, AZUL, (int(jogador_x), int(jogador_y)), JOGADOR_TAMANHO // 2)
 
-        # Atualizar projéteis
+        # Atualização de tiros e colisões
         for tiro in tiros[:]:
             tiro['x'] += tiro['dx']
             tiro['y'] += tiro['dy']
-            
-            if (tiro['x'] < 0 or tiro['x'] > LARGURA or 
-                tiro['y'] < 0 or tiro['y'] > ALTURA):
+
+            if (tiro['x'] < 0 or tiro['x'] > LARGURA or tiro['y'] < 0 or tiro['y'] > ALTURA):
                 tiros.remove(tiro)
-            else:
-                for obs in Projétils[:]:
-                    if obs['cor'] == VERDE:
-                        distancia = math.hypot(tiro['x'] - obs['x'], tiro['y'] - obs['y'])
-                        tiro_raio = tiro['tamanho'] // 2
-                        obs_raio = TAMANHO_Projétil // 2
-                        if distancia < tiro_raio + obs_raio:
-                            try:
-                                Projétils.remove(obs)
-                                tiros.remove(tiro)
-                            except ValueError:
-                                pass
+                continue
 
-        # Desenhar tiros
-        for tiro in tiros:
-            pygame.draw.rect(TELA, tiro['cor'], (
-                int(tiro['x'] - tiro['tamanho']//2), 
-                int(tiro['y'] - tiro['tamanho']//2), 
-                tiro['tamanho'], 
-                tiro['tamanho']
-            ))  
+            # Colisão com projéteis verdes
+            for obs in projeteis[:]:
+                if obs['cor'] == VERDE:
+                    distancia = math.hypot(tiro['x'] - obs['x'], tiro['y'] - obs['y'])
+                    if distancia < TAMANHO_PROJETIL // 2 + TAMANHO_TIRO // 2:
+                        projeteis.remove(obs)
+                        tiros.remove(tiro)
+                        break
 
-        # Atualizar projetil (verdes seguem o jogador)
-        for obs in Projétils[:]:
+            
+            for boss in boss_balls[:]:
+                distancia = math.hypot(tiro['x'] - boss['x'], tiro['y'] - boss['y'])
+                if distancia < TAMANHO_BOLA_CHEFE // 2 + TAMANHO_TIRO // 2:
+                    boss['saude'] -= 1
+                    tiros.remove(tiro)
+                    if boss['saude'] <= 0:
+                        boss_balls.remove(boss)
+                    break
+
+          
+            for boss in boss_cinzas[:]:
+                distancia = math.hypot(tiro['x'] - boss['x'], tiro['y'] - boss['y'])
+                if distancia < TAMANHO_BOLA_CHEFE // 2 + TAMANHO_TIRO // 2:
+                    boss['saude'] -= 1
+                    tiros.remove(tiro)
+                    if boss['saude'] <= 0:
+                        boss_cinzas.remove(boss)
+                    break
+
+        # Atualização de projéteis
+        for obs in projeteis[:]:
             if obs['cor'] == VERDE:
-                dx, dy = calcular_direcao(obs['x'], obs['y'], jogador_x, jogador_y, VEL_Projétil_VERDE)
-                obs['dx'] = dx
-                obs['dy'] = dy
+                dx, dy = calcular_direcao(obs['x'], obs['y'], jogador_x, jogador_y, VEL_PROJETIL_VERDE)
+                obs['dx'], obs['dy'] = dx, dy
                 obs['angulo'] = math.degrees(math.atan2(-dy, dx))
+            
             obs['x'] += obs['dx']
             obs['y'] += obs['dy']
-            if math.dist((obs['x'], obs['y']), (jogador_x, jogador_y)) < JOGADOR_TAMANHO//2 + TAMANHO_Projétil//2:
+
+            if math.dist((obs['x'], obs['y']), (jogador_x, jogador_y)) < JOGADOR_TAMANHO // 2 + TAMANHO_PROJETIL // 2:
                 if tempo_jogo > recorde_tempo:
                     recorde_tempo = tempo_jogo
                 if tela_morte(tempo_jogo):
                     main()
                 rodando = False
-            if obs['x'] < -TAMANHO_Projétil or obs['x'] > LARGURA or obs['y'] < -TAMANHO_Projétil or obs['y'] > ALTURA:
-                Projétils.remove(obs)
 
-        # Fazer projetil
-        for obs in Projétils:
-            desenhar_triangulo(TELA, obs['cor'], (int(obs['x']), int(obs['y'])), TAMANHO_Projétil//2, obs['angulo'])
+            if (obs['x'] < -TAMANHO_PROJETIL or obs['x'] > LARGURA or obs['y'] < -TAMANHO_PROJETIL or obs['y'] > ALTURA):
+                projeteis.remove(obs)
 
+        
+        for boss in boss_balls[:]:
+            dx, dy = calcular_direcao(boss['x'], boss['y'], jogador_x, jogador_y, VEL_BOLA_CHEFE)
+            boss['x'] += dx
+            boss['y'] += dy
+
+            if math.dist((boss['x'], boss['y']), (jogador_x, jogador_y)) < JOGADOR_TAMANHO // 2 + TAMANHO_BOLA_CHEFE // 2:
+                if tempo_jogo > recorde_tempo:
+                    recorde_tempo = tempo_jogo
+                if tela_morte(tempo_jogo):
+                    main()
+                rodando = False
+
+        
+        for boss in boss_cinzas[:]:
+            dx, dy = calcular_direcao(boss['x'], boss['y'], jogador_x, jogador_y, VEL_BOLA_CHEFE_CINZA)
+            boss['x'] += dx
+            boss['y'] += dy
+
+            if math.dist((boss['x'], boss['y']), (jogador_x, jogador_y)) < JOGADOR_TAMANHO // 2 + TAMANHO_BOLA_CHEFE // 2:
+                if tempo_jogo > recorde_tempo:
+                    recorde_tempo = tempo_jogo
+                if tela_morte(tempo_jogo):
+                    main()
+                rodando = False
+
+        # verif da vitoria chefe amarelo  
+        if BOSS_ACTIVE and len(boss_balls) == 0:
+            BOSS_ACTIVE = False
+            BOSS_DERROTADO = True
+            pygame.time.set_timer(GERACAO_PROJETIL, time_geracao_projetil) 
+            pygame.time.set_timer(GERACAO_PROJETIL_VERDE, 6000)  
+            projeteis.clear()
+
+        # Verif da vitoria chefe cinza 
+        if BOSS_CINZA_ACTIVE and len(boss_cinzas) == 0:
+            BOSS_CINZA_ACTIVE = False
+            pygame.time.set_timer(GERACAO_PROJETIL, time_geracao_projetil)  
+            pygame.time.set_timer(GERACAO_PROJETIL_VERDE, 6000)  
+            projeteis.clear()
+
+       
+        for obs in projeteis:
+            desenhar_triangulo(TELA, obs['cor'], (int(obs['x']), int(obs['y'])), TAMANHO_PROJETIL // 2, obs['angulo'])
+
+        for tiro in tiros:
+            pygame.draw.rect(TELA, tiro['cor'], (
+                int(tiro['x'] - tiro['tamanho'] // 2), 
+                int(tiro['y'] - tiro['tamanho'] // 2), 
+                tiro['tamanho'], 
+                tiro['tamanho']
+            ))
+
+        for boss in boss_balls:
+            pygame.draw.circle(TELA, boss['cor'], (int(boss['x']), int(boss['y'])), TAMANHO_BOLA_CHEFE // 2)
+
+        for boss in boss_cinzas:
+            pygame.draw.circle(TELA, boss['cor'], (int(boss['x']), int(boss['y'])), TAMANHO_BOLA_CHEFE // 2)
+
+       
         tempo_texto = font.render(f"Tempo: {tempo_jogo}s", True, BRANCO)
         recorde_texto = font.render(f"Recorde: {recorde_tempo}s", True, BRANCO)
         TELA.blit(tempo_texto, (10, 10))
