@@ -18,10 +18,7 @@ AMARELO = (255, 255, 0)
 CINZA = (128, 128, 128) 
 PRETO = (0, 0, 0)
 
-
 JOGADOR_TAMANHO = 30
-
-
 TAMANHO_PROJETIL = 40
 VEL_PROJETIL = 21
 VEL_PROJETIL_VERDE = 11
@@ -33,11 +30,9 @@ DISTANCIA_MINIMA_SPAWN = 300
 aumentos_restantes = AUMENTOS_VELOCIDADE
 intervalo_aumento = 6000
 time_geracao_projetil = 600
-
-
 TAMANHO_BOLA_CHEFE = 60
-VEL_BOLA_CHEFE = 4
-VEL_BOLA_CHEFE_CINZA = 6 
+VEL_BOLA_CHEFE = 11
+VEL_BOLA_CHEFE_CINZA = 16
 SAUDE_BOLA_CHEFE = 30
 
 # Variáveis do jogo
@@ -46,14 +41,13 @@ tiros = []
 boss_balls = []
 boss_cinzas = [] 
 BOSS_ACTIVE = False
-BOSS_CINZA_ACTIVE = False  #
+BOSS_CINZA_ACTIVE = False  
 recorde_tempo = 0
 BOSS_DERROTADO = False
 
 clock = pygame.time.Clock()
 GERACAO_PROJETIL = pygame.USEREVENT + 1
 GERACAO_PROJETIL_VERDE = pygame.USEREVENT + 2
-
 
 font = pygame.font.Font(None, 36)
 fundo = pygame.image.load("ao.jpg")
@@ -133,8 +127,7 @@ def tela_morte(tempo_jogo):
 def main():
     global VEL_PROJETIL, aumentos_restantes, recorde_tempo, BOSS_ACTIVE, projeteis, tiros, boss_balls, BOSS_DERROTADO, BOSS_CINZA_ACTIVE, boss_cinzas
 
-   
-    VEL_PROJETIL = 13
+    VEL_PROJETIL = 21
     aumentos_restantes = AUMENTOS_VELOCIDADE
     projeteis.clear()
     tiros.clear()
@@ -156,11 +149,9 @@ def main():
         clock.tick(60)
         TELA.blit(fundo, (0, 0))
 
-        
         tempo_atual = pygame.time.get_ticks()
         tempo_jogo = (tempo_atual - tempo_inicio) // 1000
 
-        
         if tempo_jogo >= 10 and not BOSS_ACTIVE and not BOSS_DERROTADO and len(boss_balls) == 0:
             BOSS_ACTIVE = True
             pygame.time.set_timer(GERACAO_PROJETIL, 0)  
@@ -174,7 +165,7 @@ def main():
                 })
 
         # Lógica de ativação do chefe cinza
-        if tempo_jogo >= 40 and not BOSS_CINZA_ACTIVE and len(boss_cinzas) == 0 and not BOSS_ACTIVE:  
+        if tempo_jogo >= 40 and not BOSS_CINZA_ACTIVE and len(boss_cinzas) == 0:  
             BOSS_CINZA_ACTIVE = True
             for _ in range(3):
                 boss_cinzas.append({
@@ -268,7 +259,6 @@ def main():
                         tiros.remove(tiro)
                         break
 
-            
             for boss in boss_balls[:]:
                 distancia = math.hypot(tiro['x'] - boss['x'], tiro['y'] - boss['y'])
                 if distancia < TAMANHO_BOLA_CHEFE // 2 + TAMANHO_TIRO // 2:
@@ -278,7 +268,6 @@ def main():
                         boss_balls.remove(boss)
                     break
 
-          
             for boss in boss_cinzas[:]:
                 distancia = math.hypot(tiro['x'] - boss['x'], tiro['y'] - boss['y'])
                 if distancia < TAMANHO_BOLA_CHEFE // 2 + TAMANHO_TIRO // 2:
@@ -308,7 +297,6 @@ def main():
             if (obs['x'] < -TAMANHO_PROJETIL or obs['x'] > LARGURA or obs['y'] < -TAMANHO_PROJETIL or obs['y'] > ALTURA):
                 projeteis.remove(obs)
 
-        
         for boss in boss_balls[:]:
             dx, dy = calcular_direcao(boss['x'], boss['y'], jogador_x, jogador_y, VEL_BOLA_CHEFE)
             boss['x'] += dx
@@ -321,7 +309,6 @@ def main():
                     main()
                 rodando = False
 
-        
         for boss in boss_cinzas[:]:
             dx, dy = calcular_direcao(boss['x'], boss['y'], jogador_x, jogador_y, VEL_BOLA_CHEFE_CINZA)
             boss['x'] += dx
@@ -334,7 +321,7 @@ def main():
                     main()
                 rodando = False
 
-        # verif da vitoria chefe amarelo  
+        # Verificação da vitória do chefe amarelo  
         if BOSS_ACTIVE and len(boss_balls) == 0:
             BOSS_ACTIVE = False
             BOSS_DERROTADO = True
@@ -342,14 +329,13 @@ def main():
             pygame.time.set_timer(GERACAO_PROJETIL_VERDE, 6000)  
             projeteis.clear()
 
-        # Verif da vitoria chefe cinza 
+        # Verificação da vitória do chefe cinza 
         if BOSS_CINZA_ACTIVE and len(boss_cinzas) == 0:
             BOSS_CINZA_ACTIVE = False
             pygame.time.set_timer(GERACAO_PROJETIL, time_geracao_projetil)  
             pygame.time.set_timer(GERACAO_PROJETIL_VERDE, 6000)  
             projeteis.clear()
 
-       
         for obs in projeteis:
             desenhar_triangulo(TELA, obs['cor'], (int(obs['x']), int(obs['y'])), TAMANHO_PROJETIL // 2, obs['angulo'])
 
@@ -367,7 +353,6 @@ def main():
         for boss in boss_cinzas:
             pygame.draw.circle(TELA, boss['cor'], (int(boss['x']), int(boss['y'])), TAMANHO_BOLA_CHEFE // 2)
 
-       
         tempo_texto = font.render(f"Tempo: {tempo_jogo}s", True, BRANCO)
         recorde_texto = font.render(f"Recorde: {recorde_tempo}s", True, BRANCO)
         TELA.blit(tempo_texto, (10, 10))
