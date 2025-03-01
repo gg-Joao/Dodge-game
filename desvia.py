@@ -21,18 +21,18 @@ PRETO = (0, 0, 0)
 JOGADOR_TAMANHO = 30
 TAMANHO_PROJETIL = 40
 VEL_PROJETIL = 21
-VEL_PROJETIL_VERDE = 11
+VEL_PROJETIL_VERDE = 16
 VELOCIDADE_TIRO = 16
 TAMANHO_TIRO = 11
-MAX_VELOCIDADE = 36
-AUMENTOS_VELOCIDADE = 16
-DISTANCIA_MINIMA_SPAWN = 600
+MAX_VELOCIDADE = 60
+AUMENTOS_VELOCIDADE = 36
+DISTANCIA_MINIMA_SPAWN = 360
 aumentos_restantes = AUMENTOS_VELOCIDADE
 intervalo_aumento = 6000
 time_geracao_projetil = 600
 TAMANHO_BOLA_CHEFE = 60
 VEL_BOLA_CHEFE = 11
-VEL_BOLA_CHEFE_CINZA = 11
+VEL_BOLA_CHEFE_CINZA = 13
 SAUDE_BOLA_CHEFE = 23
 
 # Variáveis do jogo
@@ -101,7 +101,7 @@ def tela_morte(tempo_jogo):
         titulo = font.render("Você perdeu!", True, BRANCO)
         TELA.blit(titulo, (LARGURA // 2 - titulo.get_width() // 2, 100))
 
-        tempo_final = font.render(f" Recorde: {tempo_jogo}s", True, BRANCO)
+        tempo_final = font.render(f" Tempo obtido: {tempo_jogo}s", True, BRANCO)
         TELA.blit(tempo_final, (LARGURA // 2 - tempo_final.get_width() // 2, 200))
 
         botao_jogar_novamente = pygame.Rect(LARGURA // 2 - 220, 300, 200, 50)
@@ -142,7 +142,7 @@ def main():
     tempo_ultimo_aumento = pygame.time.get_ticks()
 
     pygame.time.set_timer(GERACAO_PROJETIL, time_geracao_projetil)
-    pygame.time.set_timer(GERACAO_PROJETIL_VERDE, 6000)
+    pygame.time.set_timer(GERACAO_PROJETIL_VERDE, 3000)
 
     rodando = True
     while rodando:
@@ -152,25 +152,35 @@ def main():
         tempo_atual = pygame.time.get_ticks()
         tempo_jogo = (tempo_atual - tempo_inicio) // 1000
 
-        if tempo_jogo >= 10 and not BOSS_ACTIVE and not BOSS_DERROTADO and len(boss_balls) == 0:
+        if tempo_jogo >= 23 and not BOSS_ACTIVE and not BOSS_DERROTADO and not BOSS_CINZA_ACTIVE and len(boss_balls) == 0:
             BOSS_ACTIVE = True
             pygame.time.set_timer(GERACAO_PROJETIL, 0)  
             pygame.time.set_timer(GERACAO_PROJETIL_VERDE, 0)  
             for _ in range(3):
+                while True:
+                    x = random.randint(100, LARGURA - 100)
+                    y = random.randint(100, ALTURA - 100)
+                    if math.hypot(x - jogador_x, y - jogador_y) > 500:  
+                        break
                 boss_balls.append({
-                    'x': random.randint(100, LARGURA - 100),
-                    'y': random.randint(100, ALTURA - 100),
+                    'x': x,
+                    'y': y,
                     'saude': SAUDE_BOLA_CHEFE,
                     'cor': AMARELO
                 })
 
-        # Lógica de ativação do chefe cinza
-        if tempo_jogo >= 50 and not BOSS_CINZA_ACTIVE and len(boss_cinzas) == 0:  
+        # ativação do chefe cinza
+        if tempo_jogo >= 60 and not BOSS_CINZA_ACTIVE and len(boss_cinzas) == 0:  
             BOSS_CINZA_ACTIVE = True
             for _ in range(3):
+                while True:
+                    x = random.randint(100, LARGURA - 100)
+                    y = random.randint(100, ALTURA - 100)
+                    if math.hypot(x - jogador_x, y - jogador_y) > 500:  
+                        break
                 boss_cinzas.append({
-                    'x': random.randint(100, LARGURA - 100),
-                    'y': random.randint(100, ALTURA - 100),
+                    'x': x,
+                    'y': y,
                     'saude': SAUDE_BOLA_CHEFE,
                     'cor': CINZA
                 })
@@ -241,7 +251,7 @@ def main():
         jogador_y += (mouse_y - jogador_y) * 0.2
         pygame.draw.circle(TELA, AZUL, (int(jogador_x), int(jogador_y)), JOGADOR_TAMANHO // 2)
 
-        # Atualização de tiros e colisões
+        #  tiros e colisões
         for tiro in tiros[:]:
             tiro['x'] += tiro['dx']
             tiro['y'] += tiro['dy']
@@ -277,7 +287,7 @@ def main():
                         boss_cinzas.remove(boss)
                     break
 
-        # Att de projetil 
+        # Atualização de projéteis
         for obs in projeteis[:]:
             if obs['cor'] == VERDE:
                 dx, dy = calcular_direcao(obs['x'], obs['y'], jogador_x, jogador_y, VEL_PROJETIL_VERDE)
@@ -321,20 +331,25 @@ def main():
                     main()
                 rodando = False
 
-        # Verif da vitória do chefe amarelo  
+        # Verificação da vitória do boss amarelo  
         if BOSS_ACTIVE and len(boss_balls) == 0:
             BOSS_ACTIVE = False
             BOSS_DERROTADO = True
             pygame.time.set_timer(GERACAO_PROJETIL, time_geracao_projetil) 
-            pygame.time.set_timer(GERACAO_PROJETIL_VERDE, 6000)  
+            pygame.time.set_timer(GERACAO_PROJETIL_VERDE, 1600)  
             projeteis.clear()
 
-        # Verif da vitória do chefe cinza 
+        # Verificação da vitória do boss cinza 
         if BOSS_CINZA_ACTIVE and len(boss_cinzas) == 0:
             BOSS_CINZA_ACTIVE = False
             pygame.time.set_timer(GERACAO_PROJETIL, time_geracao_projetil)  
             pygame.time.set_timer(GERACAO_PROJETIL_VERDE, 6000)  
-            projeteis.clear()  
+            projeteis.clear()
+            VEL_PROJETIL = 21
+            aumentos_restantes = AUMENTOS_VELOCIDADE
+            BOSS_DERROTADO = False
+            boss_balls.clear()  
+            BOSS_ACTIVE = False  
 
         for obs in projeteis:
             desenhar_triangulo(TELA, obs['cor'], (int(obs['x']), int(obs['y'])), TAMANHO_PROJETIL // 2, obs['angulo'])
